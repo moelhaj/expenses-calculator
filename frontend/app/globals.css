@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+table,
+th,
+td,
+tr {
+	white-space: nowrap;
+}
+
+td,
+th {
+	@apply py-3 px-3;
+}
