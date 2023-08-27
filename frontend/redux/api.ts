@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { removeCredentials } from "./slices/userSlice";
 
-const baseQuery = fetchBaseQuery({
-	baseUrl: "http://localhost:3500/api/v1",
+const baseQuery: any = fetchBaseQuery({
+	baseUrl: process.env.BASE_URL,
 	credentials: "include",
 	prepareHeaders: (headers, { getState }: { getState: any }) => {
 		const token = getState().user.token;
@@ -12,8 +13,17 @@ const baseQuery = fetchBaseQuery({
 	},
 });
 
-export const api = createApi({
-	baseQuery: baseQuery,
+const baseQueryWithVerify = async (args: any, api: any, extraOptions: any) => {
+	let result = await baseQuery(args, api, extraOptions);
+	if (result?.error?.originalStatus === 401) {
+		api.dispatch(removeCredentials());
+	}
+
+	return result;
+};
+
+export const appApi = createApi({
+	baseQuery: baseQueryWithVerify,
 	tagTypes: ["Expenses"],
 	endpoints: (builder: any) => ({}),
 });

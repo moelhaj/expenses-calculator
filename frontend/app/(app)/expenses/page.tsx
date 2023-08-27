@@ -53,7 +53,7 @@ export default function Expenses() {
 
 	return (
 		<div>
-			<div className="p-3 flex flex-col gap-3 bg-gray-100">
+			<div className="p-3 flex flex-col gap-3">
 				<Header />
 				{/* overview */}
 				<div className="flex items-center mt-5">

@@ -12,7 +12,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 		}
 	}, [user]);
 	return (
-		<div className="w-screen h-screen overflow-hidden relative mx-auto md:max-w-[1200px] bg-gray-100">
+		<div className="w-screen h-screen overflow-hidden relative mx-auto md:max-w-[1200px]">
 			<div className="w-full rounded-md">{children}</div>
 		</div>
 	);

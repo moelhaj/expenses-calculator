@@ -1,84 +1,135 @@
 "use client";
+
+import { Button } from "@/components/ui/button";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useRegisterMutation, useVerifyTokenMutation } from "@/redux/features/authApi";
+import { useAppSelector } from "@/redux/store";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { usePathname } from "next/navigation";
+
+const passwordRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})");
+
+const passwordsSchema = z.object({
+	password: z
+		.string()
+		.regex(passwordRegex, {
+			message:
+				"Password must have 1 lower case letter, 1 upper case letter, 1 number, and 1 special character",
+		})
+		.min(8, {
+			message: " Password should be at least 8 character",
+		}),
+	confirmPassword: z.string().min(8),
+});
 
 export default function ResetPassword() {
-	const router = useRouter();
-	const [newPassword, setPassword] = useState("");
-	const [confirmPassword, setConfirmPassword] = useState("");
-	const [loading, setLoading] = useState(true);
-
-	useEffect(() => {
-		// verify token
-		// router.query.slug
+	const pathname = usePathname();
+	const token = pathname.substring(pathname.lastIndexOf("/") + 1);
+	const { user } = useAppSelector((state: any) => state.user);
+	const [error, setError] = useState("");
+	const [register, { isLoading, isSuccess }] = useRegisterMutation();
+	const [verifyToken, { isLoading: verifyLoading, isSuccess: verifySuccess }] =
+		useVerifyTokenMutation();
+	const form = useForm<z.infer<typeof passwordsSchema>>({
+		resolver: zodResolver(passwordsSchema),
+		defaultValues: passwordsSchema.parse({
+			password: "",
+			confirmPassword: "",
+		}),
 	});
 
-	const handleSubmit = async () => {};
+	async function onSubmit(data: z.infer<typeof passwordsSchema>) {
+		setError("");
+		if (data.password !== data.confirmPassword) {
+			return setError("Passwords didn't match");
+		}
+
+		try {
+			await verifyToken(token);
+			if (!verifySuccess) {
+				await register({
+					email: user.email,
+					password: data.password,
+				}).unwrap();
+			}
+		} catch (error: any) {
+			if (error.originalStatus === 409) {
+				return setError("Error resting password, try again later");
+			}
+		}
+	}
+
+	useEffect(() => {
+		if (isSuccess) {
+			redirect("/login");
+		}
+	}, [isSuccess]);
 
 	return (
 		<div className="bg-white rounded-md px-3 py-5 w-[400px]">
 			<h1 className="font-bold text-2xl">Reset Password</h1>
-			<form onSubmit={handleSubmit} className="space-y-6 w-full mt-5" method="POST">
-				{/* Password */}
-				<div>
-					<label
-						htmlFor="password"
-						className="block text-sm font-medium leading-6 text-gray-900"
-					>
-						New Password
-					</label>
-					<div className="mt-1">
-						<input
-							id="password"
-							name="password"
-							type="password"
-							required
-							className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							value={newPassword}
-							onChange={(event: any) => setPassword(event.target.value)}
-						/>
-					</div>
-				</div>
-				{/* confirm Password */}
-				<div>
-					<label
-						htmlFor="confirm-password"
-						className="block text-sm font-medium leading-6 text-gray-900"
-					>
-						Confirm Password
-					</label>
-					<div className="mt-1">
-						<input
-							id="confirm-password"
-							name="confirm-password"
-							type="password"
-							required
-							className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							value={confirmPassword}
-							onChange={(event: any) => setConfirmPassword(event.target.value)}
-						/>
-					</div>
-				</div>
-				<div>
-					<button
-						type="submit"
-						className="duration-300 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-					>
+			{error !== "" && <p className="text-red-600 text-sm mt-3">{error}</p>}
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4 mt-3">
+					<FormField
+						control={form.control}
+						name="password"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Password</FormLabel>
+								<FormControl>
+									<Input
+										disabled={isLoading || verifyLoading}
+										type="password"
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<FormField
+						control={form.control}
+						name="confirmPassword"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>confirm Password</FormLabel>
+								<FormControl>
+									<Input
+										disabled={isLoading || verifyLoading}
+										type="password"
+										{...field}
+									/>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<Button type="submit" disabled={isLoading || verifyLoading}>
 						Reset
-					</button>
-				</div>
-			</form>
-			<div className="mt-10 flex flex-col gap-5">
-				<p>
-					Your request to reset your password has been received successfully. Please check
-					your mail box to proceed further.
-				</p>
-				<div>
+					</Button>
+				</form>
+			</Form>
+			<div className="mt-10">
+				<p className="flex items-center gap-1">
+					Already have an account?
 					<Link href="/login" className="hover:text-gray-900 duration-300">
-						Back to Sign in.
+						Sign in.
 					</Link>
-				</div>
+				</p>
 			</div>
 		</div>
 	);

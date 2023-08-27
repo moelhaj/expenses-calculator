@@ -1,4 +1,4 @@
-import { api } from "../api";
+import { appApi } from "../api";
 
 type Expense = {
 	id?: string;
@@ -11,7 +11,7 @@ type Expense = {
 
 type ExpenseResponse = Expense[];
 
-export const expensesApi = api.injectEndpoints({
+export const expensesApi = appApi.injectEndpoints({
 	endpoints: build => ({
 		getExpenses: build.query<ExpenseResponse, void>({
 			query: () => "/expenses",

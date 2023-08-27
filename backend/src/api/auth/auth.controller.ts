@@ -17,7 +17,9 @@ export const login = async (req: Request, res: Response) => {
 	if (!user || !(await argon2.verify(user?.password, password)))
 		return res.status(400).send("Wrong Credentials");
 
-	const token = jwt.sign({ id: user?.id }, config.accessSecret);
+	const token = jwt.sign({ id: user?.id }, config.accessSecret, {
+		expiresIn: "1h",
+	});
 	const returnedUser = {
 		id: user.id,
 		email: user.email,

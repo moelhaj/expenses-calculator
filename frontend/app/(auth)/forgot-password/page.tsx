@@ -1,56 +1,88 @@
 "use client";
+
+import { Button } from "@/components/ui/button";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForgetPasswordMutation } from "@/redux/features/authApi";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useState } from "react";
+import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+const UserSchema = z.object({
+	email: z.string().email().trim().toLowerCase(),
+});
 
 export default function Reset() {
-	const [email, setEmail] = useState("");
+	const [error, setError] = useState("");
+	const [forgetPassword, { isLoading, isSuccess }] = useForgetPasswordMutation();
+	const form = useForm<z.infer<typeof UserSchema>>({
+		resolver: zodResolver(UserSchema),
+		defaultValues: UserSchema.parse({
+			email: "",
+		}),
+	});
 
-	const handleSubmit = async () => {};
+	async function onSubmit(data: z.infer<typeof UserSchema>) {
+		setError("");
+		try {
+			await forgetPassword({
+				email: data.email,
+			}).unwrap();
+		} catch (error: any) {
+			if (error.originalStatus === 409) {
+				return setError("Error resting password, try again later");
+			}
+		}
+	}
+
+	useEffect(() => {
+		if (isSuccess) {
+			redirect("/login");
+		}
+	}, [isSuccess]);
 
 	return (
 		<div className="bg-white rounded-md px-3 py-5 w-[400px]">
-			<h1 className="font-bold text-2xl">Reset Password</h1>
-			<form onSubmit={handleSubmit} className="space-y-6 w-full mt-5" method="POST">
-				{/* Email */}
-				<div>
-					<label
-						htmlFor="email"
-						className="block text-sm font-medium leading-6 text-gray-900"
-					>
-						Email address
-					</label>
-					<div className="mt-1">
-						<input
-							id="email"
-							name="email"
-							type="email"
-							required
-							className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-							value={email}
-							onChange={(event: any) => setEmail(event.target.value)}
-						/>
-					</div>
-				</div>
-
-				<div>
-					<button
-						type="submit"
-						className="duration-300 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-					>
-						Reset
-					</button>
-				</div>
-			</form>
-			<div className="mt-10 flex flex-col gap-5">
-				<p>
-					Your request to reset your password has been received successfully. Please check
-					your mail box to proceed further.
-				</p>
-				<div>
+			<h1 className="font-bold text-2xl">Sign Up</h1>
+			<p>An email will send to you, please follow the instructions</p>
+			{error !== "" && <p className="text-red-600 text-sm mt-3">{error}</p>}
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4 mt-3">
+					<FormField
+						control={form.control}
+						name="email"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Email</FormLabel>
+								<FormControl>
+									<Input disabled={isLoading} {...field} />
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+					<Button type="submit" disabled={isLoading}>
+						Send Email
+					</Button>
+				</form>
+			</Form>
+			<div className="mt-10">
+				<p className="flex items-center gap-1">
+					Already have an account?
 					<Link href="/login" className="hover:text-gray-900 duration-300">
-						Back to Sign in.
+						Sign in.
 					</Link>
-				</div>
+				</p>
 			</div>
 		</div>
 	);
