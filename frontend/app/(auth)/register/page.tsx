@@ -40,12 +40,12 @@ export default function Register() {
 	const [register, { isLoading, isSuccess }] = useRegisterMutation();
 	const form = useForm<z.infer<typeof UserSchema>>({
 		resolver: zodResolver(UserSchema),
-		defaultValues: UserSchema.parse({
-			name: "",
-			email: "",
-			password: "",
-			confirmPassword: "",
-		}),
+		// defaultValues: UserSchema.parse({
+		// 	name: "",
+		// 	email: "",
+		// 	password: "",
+		// 	confirmPassword: "",
+		// }),
 	});
 
 	async function onSubmit(data: z.infer<typeof UserSchema>) {

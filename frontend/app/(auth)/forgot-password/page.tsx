@@ -27,9 +27,9 @@ export default function Reset() {
 	const [forgetPassword, { isLoading, isSuccess }] = useForgetPasswordMutation();
 	const form = useForm<z.infer<typeof UserSchema>>({
 		resolver: zodResolver(UserSchema),
-		defaultValues: UserSchema.parse({
-			email: "",
-		}),
+		// defaultValues: UserSchema.parse({
+		// 	email: "",
+		// }),
 	});
 
 	async function onSubmit(data: z.infer<typeof UserSchema>) {

@@ -8,6 +8,7 @@ import { filterArray } from "@/utils/filterArray";
 import { parseFilters } from "@/utils/parseFilters";
 import { useEffect, useState } from "react";
 import { CgSpinnerTwo } from "react-icons/cg";
+import { AiOutlineInfoCircle } from "react-icons/ai";
 
 export default function Expenses() {
 	const [data, setData] = useState<any>(null);
@@ -57,7 +58,13 @@ export default function Expenses() {
 				<Header />
 				{/* overview */}
 				<div className="flex items-center mt-5">
-					<Report />
+					{data && data.length > 0 && <Report />}
+					{data && data.length < 1 && (
+						<div className="flex items-center gap-2 text-sm text-gray-500">
+							<AiOutlineInfoCircle />
+							<span>Add expenses to be able to generate reports</span>
+						</div>
+					)}
 				</div>
 				{/* Table */}
 				<div className="mt-5">

@@ -106,7 +106,6 @@ export default function EditExpense({ expense, open, setOpen }: any) {
 				category: category !== "" ? category : expense.category,
 				userId: user.id,
 			});
-			formRef.current.reset();
 			if (response.error) return setError("Something wrong try again later");
 		} catch (error: any) {
 			return setError("Something wrong try again later");
@@ -115,6 +114,7 @@ export default function EditExpense({ expense, open, setOpen }: any) {
 
 	useEffect(() => {
 		if (isSuccess) {
+			formRef.current.reset();
 			setOpen(false);
 		}
 	}, [isSuccess]);

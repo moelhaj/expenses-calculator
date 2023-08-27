@@ -45,10 +45,10 @@ export default function ResetPassword() {
 		useVerifyTokenMutation();
 	const form = useForm<z.infer<typeof passwordsSchema>>({
 		resolver: zodResolver(passwordsSchema),
-		defaultValues: passwordsSchema.parse({
-			password: "",
-			confirmPassword: "",
-		}),
+		// defaultValues: passwordsSchema.parse({
+		// 	password: "",
+		// 	confirmPassword: "",
+		// }),
 	});
 
 	async function onSubmit(data: z.infer<typeof passwordsSchema>) {

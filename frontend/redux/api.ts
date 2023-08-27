@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { removeCredentials } from "./slices/userSlice";
 
 const baseQuery: any = fetchBaseQuery({
-	baseUrl: process.env.BASE_URL,
+	baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
 	credentials: "include",
 	prepareHeaders: (headers, { getState }: { getState: any }) => {
 		const token = getState().user.token;

@@ -109,7 +109,6 @@ export default function NewExpense() {
 				category,
 				userId: user.id,
 			});
-			formRef.current.reset();
 			if (response.error) return setError("Something wrong try again later");
 		} catch (error: any) {
 			return setError("Something wrong try again later");
@@ -118,6 +117,7 @@ export default function NewExpense() {
 
 	useEffect(() => {
 		if (isSuccess) {
+			formRef.current.reset();
 			setOpen(false);
 		}
 	}, [isSuccess]);
